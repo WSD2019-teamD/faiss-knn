@@ -8,12 +8,13 @@ app = Flask(__name__)
 
 @app.route('/knn')
 def knn():
-    id = str(request.args.get('id'))
+    id_list = request.args.get('id').split(',')
+    print(id_list)
     count = int(request.args.get('count'))
-    result = search_knn(id, count)
+    result = search_knn(id_list, count)
     return json.dumps(result)
 
 host = sys.argv[1]
 port = int(sys.argv[2])
 
-app.run(host=host, port=port, debug=False)
+app.run(host=host, port=port, debug=True)
