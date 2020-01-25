@@ -68,20 +68,17 @@ def get_simple_df(df):
     df['tags_str'] = df['tags'].apply(
         lambda tags: ','.join(tag['name'] for tag in tags if not tag['name'] == '\x00')
     )
-    df['title'] = df['title'].str.replace('\r', '')
+    df['title'] = df['title'].str.replace('\r', '').apply(lambda x : x.translate(non_bmp_map))
     df['article_id'] = df['id']
     df['html'] = df['rendered_body'].apply(lambda x : x.translate(non_bmp_map))
 
     wakati_list = []
 
     for i in df['html']:
-        wakati_list.append(wakati(i))
-        '''
         try:
             wakati_list.append(wakati(i))
         except:
             wakati_list.append('')
-            '''
     
     df['tokens'] = pd.Series(wakati_list)
 
@@ -120,7 +117,7 @@ def get_items(start, end):
 if __name__ == "__main__":
     from database import insert_article_data
     end = datetime.date.today()
-    start = end - datetime.timedelta(days=2)
+    start = end - datetime.timedelta(days=5)
     df = get_items(start, end)
 
     insert_article_data(df)
