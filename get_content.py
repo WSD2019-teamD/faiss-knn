@@ -16,7 +16,7 @@ with open('private.json') as f:
     token = json.load(f)['qiita_access_token']
 h = {'Authorization': 'Bearer ' + token}
 
-sleep_sec = 3.6
+sleep_sec = 1.0
 
 # BMP外を''に置換するマップ
 non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), '')
@@ -74,10 +74,13 @@ def get_simple_df(df):
     wakati_list = []
 
     for i in df['html']:
+        wakati_list.append(wakati(i))
+        '''
         try:
             wakati_list.append(wakati(i))
         except:
             wakati_list.append('')
+            '''
     
     df['tokens'] = pd.Series(wakati_list)
 
@@ -111,4 +114,13 @@ def get_items(start, end):
 
     df_all = pd.concat(df_list, ignore_index=True)
     print('{} articles fetched.'.format(len(df_all)))
+    df_all.to_csv('./data/df.csv')
     return df_all
+
+if __name__ == "__main__":
+    from database import insert_article_data
+    end = datetime.date.today()
+    start = end - datetime.timedelta(days=2)
+    df = get_items(start, end)
+
+    insert_article_data(df, engine)

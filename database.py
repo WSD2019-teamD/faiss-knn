@@ -11,7 +11,8 @@ with open('private.json') as f:
 
 db_url = dbinfo['url']
 db = dbinfo['db']
-table = dbinfo['table']
+table_api = dbinfo['table_api']
+table_vec = dbinfo['table_vec']
 
 url = urlparse(db_url)
 
@@ -56,7 +57,7 @@ def insert_article_data(df, engine):
                                         tokens = :tokens""".format(db, table))
     '''
     print('Inserting into database...')
-    query = text('insert into {}.{}('.format(db, table)
+    query = text('insert into {}.{}('.format(db, table_api)
             + str(columns).strip('[]').replace("'", "")
             + ') values ('
             + str([':' + s for s in columns]).strip('[]').replace("'", "")
@@ -83,10 +84,29 @@ def insert_article_data(df, engine):
     else:
         print('{} errors occured.'.format(err_cnt))
 
-if __name__ == "__main__":
-    from get_content import get_items
-    end = datetime.date.today()
-    start = end - datetime.timedelta(days=2)
-    df = get_items(start, end)
+def get_article_tokens(since):
+    query = text("select article_id, tokens from {} where created_at > '{}'".format(table_api, since))
+    return pd.read_sql(query, engine)
 
-    insert_article_data(df, engine)
+def insert_vector_data(df):
+    print('Inserting into database...')
+    err_cnt = 0
+    query = text("""insert into {}.{}(article_id, vector)
+                    values (:article_id, :vector)
+                    on duplicate key update vector = :vector""".format(db, table_vec))
+
+    for _, row in df.iterrows():
+        param = {'article_id': row['article_id'], 'vector': str(row['vector'])}
+        try:
+            engine.execute(query, **param)
+        except Exception as e:
+            print('type:' + str(type(e)))
+            print('args:' + str(e.args))
+            print('error:' + str(e))
+            err_cnt += 1
+            pass
+
+    if err_cnt == 0:
+        print('Insertion successfully completed.')
+    else:
+        print('{} errors occured.'.format(err_cnt))
