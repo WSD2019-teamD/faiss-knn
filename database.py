@@ -1,5 +1,4 @@
 import os
-import datetime
 import json
 import pandas as pd
 from urllib.parse import urlparse
@@ -21,7 +20,7 @@ engine = create_engine('mysql://{user}:{password}@{host}:{port}/{database}?chars
 columns = ['article_id', 'title', 'created_at', 'updated_at', 'likes_count', 'comments_count', 'tags_str', 'user_id', 'user_permanent_id', 'url', 'html', 'tokens']
 update_columns = ['title', 'updated_at', 'likes_count', 'comments_count', 'tags_str', 'user_id', 'html', 'tokens']
 
-def insert_article_data(df, engine):
+def insert_article_data(df):
     '''
     query = text("""insert into {}.{}(article_id,
                                       title,

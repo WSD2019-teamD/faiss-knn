@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import datetime
 import requests
 import json
 import pandas as pd
@@ -114,7 +115,6 @@ def get_items(start, end):
 
     df_all = pd.concat(df_list, ignore_index=True)
     print('{} articles fetched.'.format(len(df_all)))
-    df_all.to_csv('./data/df.csv')
     return df_all
 
 if __name__ == "__main__":
@@ -123,4 +123,4 @@ if __name__ == "__main__":
     start = end - datetime.timedelta(days=2)
     df = get_items(start, end)
 
-    insert_article_data(df, engine)
+    insert_article_data(df)
