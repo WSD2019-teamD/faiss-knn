@@ -86,8 +86,9 @@ def get_simple_df(df):
                'user_id', 'user_permanent_id', 'url', 'html', 'tokens']]
     return df
 
-# Qiitaから (start, end) の範囲で記事を取得
+# Qiitaから [start, end) の範囲で記事を取得
 def get_items(start, end):
+    start = start - datetime.timedelta(days=1)
     print('Fetching articles...')
     p = {
         'per_page': 100,
