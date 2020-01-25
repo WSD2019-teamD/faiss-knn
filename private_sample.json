@@ -1,0 +1,9 @@
+{
+    "qiita_access_token": "<access-token>",
+    "database":
+        {
+            "url": "mysql://root:mysql@0.0.0.0:3306",
+            "db": "db",
+            "table": "table"
+        }
+}
