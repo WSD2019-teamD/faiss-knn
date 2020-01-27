@@ -71,6 +71,8 @@ def get_simple_df(df):
     df['title'] = df['title'].str.replace('\r', '').apply(lambda x : x.translate(non_bmp_map))
     df['article_id'] = df['id']
     df['html'] = df['rendered_body'].apply(lambda x : x.translate(non_bmp_map))
+    df['created_at'] = df['created_at'].apply(lambda x : x[:19].replace('T', ' '))
+    df['updated_at'] = df['updated_at'].apply(lambda x : x[:19].replace('T', ' '))
 
     wakati_list = []
 
