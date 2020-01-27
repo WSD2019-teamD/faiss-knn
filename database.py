@@ -109,3 +109,11 @@ def insert_vector_data(df):
         print('Insertion successfully completed.')
     else:
         print('{} errors occured.'.format(err_cnt))
+
+def get_article_features(article_id):
+    query = text("select title, url, likes_count, tags_str, created_at from {} where article_id = '{}'".format(table_api, article_id))
+    result = engine.execute(query)
+    data = result.fetchone()
+    for d in data:
+        print(type(d))
+    return dict(data)

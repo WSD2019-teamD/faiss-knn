@@ -5,53 +5,56 @@ import glob
 import faiss
 import sys
 
-path = r'data/vec.csv'
+from database import get_article_features
+
+vec_path = 'data/vec2.csv'
 
 print('Loading csv...')
-df_vec = pd.read_csv('./data/vec.csv')
-
-df_vec = df_vec[df_vec['vec50'] != '[]'] #vec50が空のものを落とす
-df_vec = df_vec.reset_index()            #indexを修正
-df_vec = df_vec.drop('index',axis=1)
+df_vec = pd.read_csv(vec_path)
 
 dic = {}
-for i, id in enumerate(df_vec['id']):
+for i, id in enumerate(df_vec['article_id']):
     dic[id] = i
 
 
 def parseVector(string):
-    lst = string.strip('[]').replace('(', '').replace(')', '').replace(' ', '').split(',')
-    v = [float(lst[2*i + 1]) for i in range(len(lst) // 2)]
+    lst = string.strip('[]').replace(' ', '').split(',')
+    v = [float(i) for i in lst]
     return v
 
 print('Creating NumPy array...')
 
-arr = [parseVector(s) for s in df_vec['vec50']]
+vec = [parseVector(s) for s in df_vec['vector']]
+df_vec = df_vec.drop('vector', axis=1)
 
-dim = len(arr[0])   # ベクトルの次元(dimension)
+dim = len(vec[0])   # ベクトルの次元(dimension)
 
-xb = np.array(arr).astype('float32')
+arr_b = np.array(vec).astype('float32')
+del(vec)
 
 print('Building index...')
 index = faiss.IndexFlatL2(dim)
-index.add(xb)
-
+index.add(arr_b)
 
 def search_knn(id_list, count):
     s = time.time()
-    vq = []
-    for id in id_list:
-        vq.append(arr[dic[id]])
+    nq = len(id_list)
+    arr_q = np.empty((nq, dim)).astype('float32')
+    for i, id in enumerate(id_list):
+        arr_q[i] = arr_b[dic[id]]
 
-    xq = np.array(vq).astype('float32')
-    D_all, I_all = index.search(xq, count)
+    D_all, I_all = index.search(arr_q, count)
 
     res = {}
     for D, I, qid in zip(D_all, I_all, id_list):
         inner_res = {}
         for d, i in zip(D, I):
-            id = df_vec['id'][i]
-            inner_res[id] = float(d)        
+            id = df_vec['article_id'][i]
+            feature = get_article_features(id)
+            feature['distance'] = float(d)
+            feature['topic_id'] = int(np.argmax(arr_b[i]))
+            feature['created_at'] = str(feature['created_at'])
+            inner_res[id] = feature      
         res[qid] = inner_res
 
     e = time.time()
