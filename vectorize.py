@@ -2,8 +2,8 @@ import datetime
 import pandas as pd
 from gensim import models, corpora, similarities
 
-lda = models.ldamodel.LdaModel.load("data/lda/lda.model")
-d = corpora.Dictionary.load_from_text("data/lda/dict.txt")
+lda = models.ldamodel.LdaModel.load("./data/lda/5year_model_dict/lda_final_5yeardic_2019.model")
+d = corpora.Dictionary.load("./data/lda/5year_model_dict/dict_final_6years_14-19.dict")
 vec_path = './data/vec2.csv'
 
 def vectorize(df):
