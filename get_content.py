@@ -114,11 +114,3 @@ def get_items(start, end):
     df_all = pd.concat(df_list, ignore_index=True)
     print('{} articles fetched.'.format(len(df_all)))
     return df_all
-
-if __name__ == "__main__":
-    from database import insert_article_data
-    end = datetime.date.today()
-    start = end - datetime.timedelta(days=5)
-    df = get_items(start, end)
-
-    insert_article_data(df)
